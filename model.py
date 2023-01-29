@@ -21,32 +21,6 @@ from predictor import VisualizationDemo
 
 mp.set_start_method('spawn', force=True)
 
-UNSUPERVISED_MODELS = {
-    'Unsupervised': {
-        'config_path':
-        'CutLER/cutler/model_zoo/configs/CutLER-ImageNet/cascade_mask_rcnn_R_50_FPN.yaml',
-        'weight_url':
-        'http://dl.fbaipublicfiles.com/cutler/checkpoints/cutler_cascade_final.pth',
-    }
-}
-SEMI_SUPERVISED_MODELS = {
-    f'Semi-supervised with COCO ({perc}%)': {
-        'config_path':
-        f'CutLER/cutler/model_zoo/configs/COCO-Semisupervised/cascade_mask_rcnn_R_50_FPN_{perc}perc.yaml',
-        'weight_url':
-        f'http://dl.fbaipublicfiles.com/cutler/checkpoints/cutler_semi_{perc}perc.pth',
-    }
-    for perc in [1, 2, 5, 10, 20, 30, 40, 50, 60, 80]
-}
-FULLY_SUPERVISED_MODELS = {
-    'Fully-supervised with COCO': {
-        'config_path':
-        f'CutLER/cutler/model_zoo/configs/COCO-Semisupervised/cascade_mask_rcnn_R_50_FPN_100perc.yaml',
-        'weight_url':
-        f'http://dl.fbaipublicfiles.com/cutler/checkpoints/cutler_fully_100perc.pth',
-    }
-}
-
 
 def setup_cfg(args):
     # load config from file and command-line arguments
@@ -108,40 +82,37 @@ def get_parser():
     return parser
 
 
-class Model:
-    MODEL_DICT = UNSUPERVISED_MODELS | SEMI_SUPERVISED_MODELS | FULLY_SUPERVISED_MODELS
+CONFIG_PATH = 'CutLER/cutler/model_zoo/configs/CutLER-ImageNet/cascade_mask_rcnn_R_50_FPN.yaml'
+WEIGHT_URL = 'http://dl.fbaipublicfiles.com/cutler/checkpoints/cutler_cascade_final.pth'
 
-    def __init__(self):
-        self.model_dir = pathlib.Path('checkpoints')
-        self.model_dir.mkdir(exist_ok=True)
 
-    def load_model(self, model_name: str,
-                   score_threshold: float) -> VisualizationDemo:
-        model_info = self.MODEL_DICT[model_name]
-        weight_url = model_info['weight_url']
-        weight_path = self.model_dir / weight_url.split('/')[-1]
-        if not weight_path.exists():
-            weight_path.parent.mkdir(exist_ok=True)
-            subprocess.run(shlex.split(f'wget {weight_url} -O {weight_path}'))
+def load_model(score_threshold: float) -> VisualizationDemo:
+    model_dir = pathlib.Path('checkpoints')
+    model_dir.mkdir(exist_ok=True)
+    weight_path = model_dir / WEIGHT_URL.split('/')[-1]
+    if not weight_path.exists():
+        subprocess.run(shlex.split(f'wget {WEIGHT_URL} -O {weight_path}'))
 
-        arg_list = [
-            '--config-file', model_info['config_path'],
-            '--confidence-threshold',
-            str(score_threshold), '--opts', 'MODEL.WEIGHTS',
-            weight_path.as_posix(), 'MODEL.DEVICE',
-            'cuda:0' if torch.cuda.is_available() else 'cpu'
-        ]
-        if model_name in UNSUPERVISED_MODELS:
-            arg_list += ['DATASETS.TEST', '()']
-        args = get_parser().parse_args(arg_list)
-        cfg = setup_cfg(args)
-        return VisualizationDemo(cfg)
+    arg_list = [
+        '--config-file',
+        CONFIG_PATH,
+        '--confidence-threshold',
+        str(score_threshold),
+        '--opts',
+        'MODEL.WEIGHTS',
+        weight_path.as_posix(),
+        'MODEL.DEVICE',
+        'cuda:0' if torch.cuda.is_available() else 'cpu',
+        'DATASETS.TEST',
+        '()',
+    ]
+    args = get_parser().parse_args(arg_list)
+    cfg = setup_cfg(args)
+    return VisualizationDemo(cfg)
 
-    def __call__(self,
-                 image_path: str,
-                 model_name: str,
-                 score_threshold: float = 0.5) -> np.ndarray:
-        model = self.load_model(model_name, score_threshold)
-        image = read_image(image_path, format='BGR')
-        _, res = model.run_on_image(image)
-        return res.get_image()
+
+def run_model(image_path: str, score_threshold: float = 0.5) -> np.ndarray:
+    model = load_model(score_threshold)
+    image = read_image(image_path, format='BGR')
+    _, res = model.run_on_image(image)
+    return res.get_image()
