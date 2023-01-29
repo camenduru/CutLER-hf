@@ -1,0 +1,13 @@
+diff --git a/cutler/demo/predictor.py b/cutler/demo/predictor.py
+index 0920159..6fc8053 100644
+--- a/cutler/demo/predictor.py
++++ b/cutler/demo/predictor.py
+@@ -62,6 +62,8 @@ class VisualizationDemo(object):
+                 )
+             if "instances" in predictions:
+                 instances = predictions["instances"].to(self.cpu_device)
++                if self.metadata.name == '__unused':
++                    instances.remove('pred_classes')
+                 vis_output = visualizer.draw_instance_predictions(predictions=instances)
+ 
+         return predictions, vis_output

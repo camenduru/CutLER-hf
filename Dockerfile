@@ -50,6 +50,7 @@ RUN pip install --no-cache-dir -U \
 RUN pip install --no-cache-dir -U gradio==3.16.2
 
 COPY --chown=1000 . ${HOME}/app
+RUN cd CutLER && git apply ../patch
 ENV PYTHONPATH=${HOME}/app \
 	PYTHONUNBUFFERED=1 \
 	GRADIO_ALLOW_FLAGGING=never \

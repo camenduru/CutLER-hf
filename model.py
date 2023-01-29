@@ -131,6 +131,8 @@ class Model:
             weight_path.as_posix(), 'MODEL.DEVICE',
             'cuda:0' if torch.cuda.is_available() else 'cpu'
         ]
+        if model_name in UNSUPERVISED_MODELS:
+            arg_list += ['DATASETS.TEST', '()']
         args = get_parser().parse_args(arg_list)
         cfg = setup_cfg(args)
         return VisualizationDemo(cfg)
