@@ -26,7 +26,7 @@ RUN apt-get update && \
 RUN useradd -m -u 1000 user
 USER user
 ENV HOME=/home/user \
-	PATH=/home/user/.local/bin:${PATH}
+    PATH=/home/user/.local/bin:${PATH}
 WORKDIR ${HOME}/app
 
 RUN curl https://pyenv.run | bash
@@ -47,15 +47,15 @@ RUN pip install --no-cache-dir -U \
     scikit-image==0.19.2 \
     opencv-python-headless==4.6.0.66 \
     colored==1.4.4
-RUN pip install --no-cache-dir -U gradio==3.16.2
+RUN pip install --no-cache-dir -U gradio==3.23.0
 
 COPY --chown=1000 . ${HOME}/app
-RUN cd CutLER && git apply ../patch
+RUN cd CutLER && patch -p1 < ../patch
 ENV PYTHONPATH=${HOME}/app \
-	PYTHONUNBUFFERED=1 \
-	GRADIO_ALLOW_FLAGGING=never \
-	GRADIO_NUM_PORTS=1 \
-	GRADIO_SERVER_NAME=0.0.0.0 \
-	GRADIO_THEME=huggingface \
-	SYSTEM=spaces
+    PYTHONUNBUFFERED=1 \
+    GRADIO_ALLOW_FLAGGING=never \
+    GRADIO_NUM_PORTS=1 \
+    GRADIO_SERVER_NAME=0.0.0.0 \
+    GRADIO_THEME=huggingface \
+    SYSTEM=spaces
 CMD ["python", "app.py"]
