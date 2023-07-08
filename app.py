@@ -32,5 +32,6 @@ with gr.Blocks(css='style.css') as demo:
                          image,
                          score_threshold,
                      ],
-                     outputs=result)
+                     outputs=result,
+                     api_name='run')
 demo.queue().launch()
