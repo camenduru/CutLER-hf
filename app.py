@@ -6,10 +6,7 @@ import gradio as gr
 
 from model import run_model
 
-DESCRIPTION = '''# CutLER
-
-This is an unofficial demo for [https://github.com/facebookresearch/CutLER](https://github.com/facebookresearch/CutLER).
-'''
+DESCRIPTION = '# [CutLER](https://github.com/facebookresearch/CutLER)'
 
 paths = sorted(pathlib.Path('CutLER/cutler/demo/imgs').glob('*.jpg'))
 
