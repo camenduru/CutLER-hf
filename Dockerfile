@@ -31,7 +31,7 @@ WORKDIR ${HOME}/app
 
 RUN curl https://pyenv.run | bash
 ENV PATH=${HOME}/.pyenv/shims:${HOME}/.pyenv/bin:${PATH}
-ENV PYTHON_VERSION=3.10.9
+ARG PYTHON_VERSION=3.10.11
 RUN pyenv install ${PYTHON_VERSION} && \
     pyenv global ${PYTHON_VERSION} && \
     pyenv rehash && \
@@ -45,9 +45,10 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir -U \
     numpy==1.23.5 \
     scikit-image==0.19.2 \
-    opencv-python-headless==4.6.0.66 \
+    opencv-python-headless==4.8.0.74 \
+    Pillow==9.5.0 \
     colored==1.4.4
-RUN pip install --no-cache-dir -U gradio==3.23.0
+RUN pip install --no-cache-dir -U gradio==3.36.1
 
 COPY --chown=1000 . ${HOME}/app
 RUN cd CutLER && patch -p1 < ../patch
