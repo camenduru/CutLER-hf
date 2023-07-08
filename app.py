@@ -25,7 +25,7 @@ with gr.Blocks(css='style.css') as demo:
             result = gr.Image(label='Result', type='numpy')
     with gr.Row():
         gr.Examples(examples=[[path.as_posix()] for path in paths],
-                    inputs=[image])
+                    inputs=image)
 
     run_button.click(fn=run_model,
                      inputs=[
@@ -34,4 +34,4 @@ with gr.Blocks(css='style.css') as demo:
                      ],
                      outputs=result,
                      api_name='run')
-demo.queue().launch()
+demo.queue(max_size=20).launch()
